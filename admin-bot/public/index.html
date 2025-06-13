@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Ruxshona Tort — Buyurtmalar</title>
+    <!-- <link rel="stylesheet" href="./styles/base.css">
+    <link rel="stylesheet" href="./styles/layout.css">
+    <link rel="stylesheet" href="./styles/components.css">
+    <link rel="stylesheet" href="./styles/pages.css">
+    <link rel="stylesheet" href="./styles/responsive.css"> -->
+    <link rel="stylesheet" href="./styles/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <nav class="navbar">
+      <ul>
+        <li class="nav-link" data-page="reports">📊 Hisobotlar</li>
+        <li class="nav-link active" data-page="pending">📥 Buyurtmalar</li>
+        <li class="nav-link" data-page="accepted">✅ Qabul qilinganlar</li>
+        <li class="nav-link" data-page="cancelled">❌ Bekor qilinganlar</li>
+        <li class="nav-link" data-page="ready">📦 Tayyorlar</li>
+      </ul>
+    </nav>
+
+    <main>
+      <section id="reports" class="page-section"></section>
+      <section id="pending" class="page-section active"></section>
+      <section id="accepted" class="page-section"></section>
+      <section id="cancelled" class="page-section"></section>
+      <section id="ready" class="page-section"></section>
+    </main>
+
+    <script src="./scripts/telegram-orders.js"></script>
+  </body>
+</html>
