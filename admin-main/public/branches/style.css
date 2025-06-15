@@ -56,11 +56,12 @@ body {
   color: #777;
 }
 
-/* Sidebar (sotuv paneli) */
+/* Formani yashirish va ochish holati */
+
 .sidebar {
   position: fixed;
   top: 0;
-  right: -400px; /* Yashiringan holat */
+  right: -400px;
   width: 350px;
   height: 100%;
   background-color: #fff;
@@ -73,6 +74,7 @@ body {
 .sidebar.open {
   right: 0;
 }
+
 
 .sidebar h2 {
   margin-top: 0;
@@ -131,4 +133,60 @@ body {
   text-align: center;
   margin-top: 10px;
   font-weight: bold;
+}
+
+.categories {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+  flex-wrap: wrap;
+}
+
+.category-btn {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  background-color: #f3f3f3;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.category-btn.active {
+  background-color: #770E13;
+  color: #fff;
+}
+
+.sales-history-table {
+  width: 100%;
+  margin-top: 30px;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.sales-history-table th,
+.sales-history-table td {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.sales-history-table th {
+  background-color: #f6eada;
+  color: #770E13;
+}
+
+
+.menu__buttons{
+  cursor: pointer;
+  background-color: transparent;
+  padding: 8px 14px;
+  border-radius: 20px;
+}
+
+.menu__buttons:hover{
+  border: none;
+  background-color: #770E13;
+  color: #ffff;
 }

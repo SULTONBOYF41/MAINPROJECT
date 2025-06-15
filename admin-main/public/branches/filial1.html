@@ -3,14 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <title>Filial 1 – Sotuv</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="./style.css" />
+  <link rel="stylesheet" href="../warehouse/warehouse.css" />
 </head>
 <body>
-  <h1 class="page-title">📦 Filial 1 – Mahsulotlar</h1>
+  <div class="container">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+      <h1 class="page-title">📦 Filial 1 – Mahsulotlar</h1>
+      <div>
+        <button id="btn-products" class="menu__buttons">📦 Mahsulotlar</button>
+        <button id="btn-sales" class="menu__buttons">🧾 Sotuvlar tarixi</button>
+      </div>
+    </div>
 
-  <!-- 🧁 Mahsulotlar ro'yxati -->
-  <div class="product-grid" id="product-grid">
-    <!-- JS orqali mahsulot kartalari shu yerga yuklanadi -->
+    <!-- 📜 Sotuvlar tarixi -->
+    <div id="sales-section" style="display: none;">
+      <h2>🧾 Sotuvlar tarixi</h2>
+      <table class="sales-history-table">
+        <thead>
+          <tr>
+            <th>Sana</th>
+            <th>Mahsulot</th>
+            <th>Miqdor</th>
+            <th>Birlik</th>
+            <th>Narxi</th>
+            <td><button class="edit-sale-btn" data-id="${item.id}" data-json='${JSON.stringify(item)}'>✏️</button></td>
+          </tr>
+        </thead>
+        <tbody id="sales-history-body"></tbody>
+      </table>
+    </div>
+
+    <!-- 📦 Mahsulotlar bo‘limi -->
+    <div id="products-section">
+      <div class="search-filter">
+        <input
+          type="text"
+          id="search-input"
+          placeholder="🔍 Mahsulot nomi bo‘yicha qidiring..."
+        />
+      </div>
+
+      <div id="category-buttons" class="categories"></div>
+      <div class="product-grid" id="product-grid"></div>
+    </div>
   </div>
 
   <!-- 👉 Yon panel (sotuv formasi) -->
@@ -46,6 +82,6 @@
     </div>
   </div>
 
-  <script src="./branch-form.js"></script>
+  <script type="module" src="./branch-form.js"></script>
 </body>
 </html>

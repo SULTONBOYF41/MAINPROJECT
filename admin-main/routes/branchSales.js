@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db/database");
 
-// ✅ Yangi filial sotuvini qo‘shish
+// ✅ Filial sotuvini qo‘shish
 router.post("/", (req, res) => {
   console.log("📥 POST /branch-sales qabul qilindi");
   console.log("➡️ So‘rov body:", req.body);
@@ -14,30 +14,28 @@ router.post("/", (req, res) => {
     return res.status(400).send("❌ Barcha maydonlar to‘ldirilishi kerak");
   }
 
-  // 🔄 Formatlash
   const qty = parseFloat(quantity);
   price = parseInt(price);
 
   if (isNaN(qty) || isNaN(price)) {
     console.log("⚠️ Miqdor yoki narx noto‘g‘ri:", { qty, price });
-    return res.status(400).send("❌ Miqdor yoki narx noto‘g‘ri formatda kiritilgan");
+    return res.status(400).send("❌ Miqdor yoki narx noto‘g‘ri formatda");
   }
 
-  // 🔍 Mahsulot ID sini topamiz
-  db.get(`SELECT id FROM products WHERE name = ?`, [product], (err, found) => {
+  // 🔍 Mahsulot ID ni name + unit bo‘yicha topamiz
+  db.get(`SELECT id FROM products WHERE name = ? AND unit = ?`, [product, unit], (err, found) => {
     if (err) {
-      console.log("❌ Mahsulotni topishda xatolik:", err.message);
+      console.log("❌ Mahsulotni izlashda xatolik:", err.message);
       return res.status(500).send("❌ Mahsulotni izlashda xatolik");
     }
     if (!found) {
-      console.log("❌ Mahsulot topilmadi:", product);
+      console.log("❌ Mahsulot topilmadi:", product, unit);
       return res.status(404).send("❌ Mahsulot topilmadi");
     }
 
     const productId = found.id;
     console.log("🔎 Topilgan mahsulot ID:", productId);
 
-    // 🧾 Ombordagi mavjud miqdorni tekshirish
     db.get(
       `SELECT quantity FROM warehouse WHERE product_id = ? AND unit = ?`,
       [productId, unit],
@@ -54,17 +52,14 @@ router.post("/", (req, res) => {
 
         const availableQty = parseFloat(row.quantity);
         if (isNaN(availableQty)) {
-          console.log("⚠️ Ombordagi quantity noto‘g‘ri:", row.quantity);
           return res.status(500).send("❌ Ombordagi miqdor noto‘g‘ri formatda");
         }
-
-        console.log(`📦 Omborda mavjud: ${availableQty} ${unit}, So‘ralgan: ${qty} ${unit}`);
 
         if (availableQty < qty) {
           return res.status(400).send(`❌ Omborda yetarli mahsulot yo‘q. Bor: ${availableQty} ${unit}`);
         }
 
-        // ✅ Sotuvni qo‘shamiz
+        // ✅ Sotuvni saqlash
         db.run(
           `INSERT INTO branch_sales (branch, product, quantity, unit, price, date, source)
            VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -75,9 +70,7 @@ router.post("/", (req, res) => {
               return res.status(500).send("❌ Saqlashda xatolik: " + err.message);
             }
 
-            console.log("✅ Sotuv saqlandi, endi omborni yangilaymiz");
-
-            // 🔄 Ombordagi miqdorni yangilaymiz
+            // 🔁 Omborni yangilash
             const newQty = availableQty - qty;
             db.run(
               `UPDATE warehouse SET quantity = ?, updated_at = CURRENT_TIMESTAMP WHERE product_id = ? AND unit = ?`,
@@ -88,8 +81,7 @@ router.post("/", (req, res) => {
                   return res.status(500).send("❌ Omborni yangilashda xatolik");
                 }
 
-                console.log(`📉 Ombor yangilandi: ${newQty} ${unit} qoldi`);
-                res.send("✅ Sotuv saqlandi va ombordagi miqdor yangilandi");
+                res.send("✅ Sotuv saqlandi va ombor yangilandi");
               }
             );
           }
@@ -99,22 +91,48 @@ router.post("/", (req, res) => {
   });
 });
 
-// ✅ Sotuvlarni olish (sana bo‘yicha filter bilan)
+
 router.get("/", (req, res) => {
-  const { date } = req.query;
-  const query = date
-    ? `SELECT * FROM branch_sales WHERE date = ?`
-    : `SELECT * FROM branch_sales`;
+  const { date, branch } = req.query;
+  let query = "SELECT * FROM branch_sales";
+  const params = [];
 
-  db.all(query, date ? [date] : [], (err, rows) => {
-    if (err) {
-      console.log("❌ Sotuvlarni o‘qishda xatolik:", err.message);
-      return res.status(500).send("❌ O‘qishda xatolik");
-    }
+  if (branch && date) {
+    query += " WHERE branch = ? AND date = ?";
+    params.push(branch, date);
+  } else if (branch) {
+    query += " WHERE branch = ?";
+    params.push(branch);
+  } else if (date) {
+    query += " WHERE date = ?";
+    params.push(date);
+  }
 
-    console.log(`📊 ${rows.length} ta sotuv yozuvi topildi`);
+  db.all(query, params, (err, rows) => {
+    if (err) return res.status(500).send("❌ O‘qishda xatolik");
     res.json(rows);
   });
 });
+
+// ✅ Sotuvni yangilash
+router.put("/:id", (req, res) => {
+  const { id } = req.params;
+  const { branch, product, quantity, unit, price, date } = req.body;
+
+  if (!branch || !product || !quantity || !unit || !price || !date) {
+    return res.status(400).send("❌ Barcha maydonlar to‘ldirilishi kerak");
+  }
+
+  db.run(
+    `UPDATE branch_sales SET branch = ?, product = ?, quantity = ?, unit = ?, price = ?, date = ? WHERE id = ?`,
+    [branch, product, quantity, unit, price, date, id],
+    function (err) {
+      if (err) return res.status(500).send("❌ Yangilashda xatolik: " + err.message);
+      if (this.changes === 0) return res.status(404).send("❌ Sotuv topilmadi");
+      res.send("✅ Sotuv muvaffaqiyatli yangilandi");
+    }
+  );
+});
+
 
 module.exports = router;
