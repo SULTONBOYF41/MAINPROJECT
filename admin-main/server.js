@@ -5,6 +5,8 @@
   const path = require("path");
   const app = express();
   const PORT = 3000;
+  const variantRoutes = require("./routes/variants");
+
 
   // ======= FILE UPLOAD SETUP =======
   const storage = multer.diskStorage({
@@ -30,6 +32,9 @@
   app.use("/orders", require("./routes/orders"));
   app.use("/branch-sales", require("./routes/branchSales"));
   app.use("/api/warehouse", require("./routes/warehouse")); // faqat bitta backend route
+  app.use("/variants", variantRoutes);
+
+
 
   // ======= SERVER =======
   app.listen(PORT, () => {

@@ -104,14 +104,18 @@
       </table>
     </section>
 
-    <!-- 📦 ISHLAB CHIQARISH -->
+<!-- 📦 ISHLAB CHIQARISH -->
     <section id="page-production" class="page">
       <h2>📦 Yangi mahsulot qo‘shish</h2>
       <form id="production-form">
-        <input name="name" placeholder="Mahsulot nomi" required />
-        <input name="quantity" type="number" placeholder="Miqdor (raqam)" step="any" required />
-        <input name="unit" placeholder="Birlik (kg/dona)" required />
-        <input name="date" type="date" required />
+        <input name="name" id="prod-name" placeholder="Mahsulot nomi" required />
+        <input name="quantity" id="prod-qty" type="number" placeholder="Miqdor (raqam)" step="any" required />
+        <input name="unit" id="prod-unit" placeholder="Birlik (kg/dona)" required />
+        <!-- 🔁 Faqat variantlilar uchun -->
+        <div id="prod-size-wrapper">
+          <input name="size" id="prod-size" placeholder="Variant o‘lchami (masalan: 0.5 yoki 50)" style="display:none;" />
+        </div>
+        <input name="date" id="prod-date" type="date" required />
         <button type="submit">✅ Qo‘shish</button>
       </form>
       <h3>🧾 So‘nggi mahsulotlar</h3>
@@ -121,16 +125,33 @@
       </table>
     </section>
 
+
     <!-- 📦 MAHSULOTLAR -->
     <section id="page-products" class="page">
       <h2>📦 Mahsulotlar katalogi</h2>
       <form id="product-form" enctype="multipart/form-data">
         <input name="name" placeholder="Mahsulot nomi" required />
         <input name="category" placeholder="Kategoriya" required />
-        <input id="product-price" name="price" type="number" placeholder="Narxi (so'm)" required />
-        <input id="product-unit" name="unit" placeholder="Birlik (kg/dona)" required />
+        <input name="price" type="number" placeholder="Narxi (so'm)" id="main-price" required  />
+        <input name="unit" placeholder="Birlik (kg/dona)" id="main-unit" required />
         <input name="image" type="file" accept="image/*" />
         <textarea name="description" placeholder="Qo'shimcha ma'lumot (ixtiyoriy)"></textarea>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="has-variants"> Variantlari bor (masalan: 5 sm, 7 sm)
+          </label>
+        </div>
+
+        <!-- ✳️ Shu yerda qo‘shing -->
+        <div id="variant-section" style="display: none; margin-top: 1em;">
+          <div style="margin-bottom: 5px;">
+            <button type="button" id="add-variant">➕ Variant qo‘shish</button>
+          </div>
+          <div id="variant-container"></div>
+        </div>
+
+
+
 
         <button type="submit" id="add-button">➕ Mahsulot qo‘shish</button>
         <button type="button" id="update-button" style="display: none;">🔁 Yangilash</button>
@@ -166,6 +187,12 @@
   </script>
   <script type="module" src="./scripts/main.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="./scripts/production.js"></script>
+
+  <script type="module">
+    import { initProductForm } from './scripts/products.js';
+    initProductForm();
+  </script>
 
 </body>
 </html>

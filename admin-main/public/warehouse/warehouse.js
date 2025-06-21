@@ -1,4 +1,4 @@
-import { renderProductCard } from "../scripts/renderCard.js"; // ⬅️ eng tepaga qo‘shing
+import { renderProductCard } from "../scripts/renderCard.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   loadWarehouseData();
@@ -7,9 +7,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 let fullWarehouseData = [];
 
-// 🔄 Omborxona ma'lumotlarini yuklash
+// 🔄 Ombor ma'lumotlarini yuklash
 function loadWarehouseData() {
-  fetch("/api/warehouse") // ✅ To‘g‘rilangan marshrut
+  fetch("/api/warehouse")
     .then(res => res.json())
     .then(data => {
       if (!Array.isArray(data)) {
@@ -55,9 +55,6 @@ function setupSearchAndFilters() {
 }
 
 // 🧾 Mahsulot kartochkalarini chizish
-// 🔁 Mahsulot kartochkalarini chizish (faqat variantsiz)
-
-
 function renderWarehouseCards() {
   const container = document.getElementById("product-cards");
   const searchQuery = document.getElementById("search-input").value.toLowerCase();
@@ -72,44 +69,10 @@ function renderWarehouseCards() {
       return matchesCategory && matchesSearch;
     })
     .forEach(p => {
-      const card = renderProductCard(p); // ✅ faqat shu
-      container.appendChild(card);       // ✅ va bu
+      const cards = renderProductCard(p); // bu yerda array qaytadi
+
+      cards.forEach(card => {
+        container.appendChild(card);
+      });
     });
 }
-
-
-
-// function renderWarehouseCards() {
-//   const container = document.getElementById("product-cards");
-//   const searchQuery = document.getElementById("search-input").value.toLowerCase();
-//   const activeCategory = document.querySelector(".category-btn.active")?.textContent || "Barchasi";
-
-//   container.innerHTML = "";
-
-//   fullWarehouseData
-//     .filter(p => {
-//       const matchesCategory = activeCategory === "Barchasi" || p.category === activeCategory;
-//       const matchesSearch = (p.name || "").toLowerCase().includes(searchQuery);
-//       return matchesCategory && matchesSearch;
-//     })
-//     .forEach(p => {
-//       const card = document.createElement("div");
-//       card.className = "product-card styled-card";
-
-//       const imagePath = p.image ? `/uploads/${p.image}` : "/uploads/default.jpg";
-//       const description = p.description || "Izoh mavjud emas";
-//       const price = p.price ? `${p.price} so'm` : "Narx belgilanmagan";
-//       const qtyText = p.quantity?.value != null ? `${p.quantity.value} ${p.unit}` : "Miqdor yo'q";
-
-//       card.innerHTML = `
-//         <img src="${imagePath}" alt="${p.name}" class="product-image" />
-//         <h4>${p.name}</h4>
-//         <p class="product-subtitle">${description}</p>
-//         <div class="product-price">Narx: ${price}</div>
-//         <div class="qty">Miqdor: ${qtyText}</div>
-//       `;
-
-//       container.appendChild(card);
-//     });
-// }
-

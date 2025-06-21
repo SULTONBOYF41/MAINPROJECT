@@ -2,17 +2,17 @@
 <html lang="uz">
 <head>
   <meta charset="UTF-8" />
-  <title>Filial 2 – Sotuv</title>
+  <title>Filial 1 – Sotuv</title>
   <link rel="stylesheet" href="./style.css" />
   <link rel="stylesheet" href="../warehouse/warehouse.css" />
 </head>
 <body>
   <div class="container">
     <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
-      <h1 class="page-title">📦 Filial 2 – Mahsulotlar</h1>
+      <h1 class="page-title">📦 Filial 1 – Mahsulotlar</h1>
       <div>
-        <button id="btn-products">📦 Mahsulotlar</button>
-        <button id="btn-sales">🧾 Sotuvlar tarixi</button>
+        <button id="btn-products" class="menu__buttons">📦 Mahsulotlar</button>
+        <button id="btn-sales" class="menu__buttons">🧾 Sotuvlar tarixi</button>
       </div>
     </div>
 
@@ -58,10 +58,15 @@
         <input type="hidden" id="selected-unit" name="unit" />
         <input type="hidden" name="branch" value="Filial 1" />
 
-        <div class="form-group">
-          <label for="quantity">Miqdori</label>
-          <input type="number" id="quantity" name="quantity" step="any" required />
+        <!-- Variant select -->
+        <div class="form-group" id="variant-group" style="display: none;">
+          <label for="variant-select">Variantni tanlang</label>
+          <select id="variant-select">
+            <option value="">-- Tanlang --</option>
+          </select>
         </div>
+
+        <!-- Dinamik inputlar (size va sold-qty) JS orqali qo‘shiladi -->
 
         <div class="form-group">
           <label for="price">Narxi (so‘m)</label>
@@ -79,6 +84,7 @@
         </div>
         <p id="status-message"></p>
       </form>
+
     </div>
   </div>
 

@@ -58,10 +58,15 @@
         <input type="hidden" id="selected-unit" name="unit" />
         <input type="hidden" name="branch" value="Filial 1" />
 
-        <div class="form-group">
-          <label for="quantity">Miqdori</label>
-          <input type="number" id="quantity" name="quantity" step="any" required />
+        <!-- Variant select -->
+        <div class="form-group" id="variant-group" style="display: none;">
+          <label for="variant-select">Variantni tanlang</label>
+          <select id="variant-select">
+            <option value="">-- Tanlang --</option>
+          </select>
         </div>
+
+        <!-- Dinamik inputlar (size va sold-qty) JS orqali qo‘shiladi -->
 
         <div class="form-group">
           <label for="price">Narxi (so‘m)</label>
@@ -79,6 +84,7 @@
         </div>
         <p id="status-message"></p>
       </form>
+
     </div>
   </div>
 
