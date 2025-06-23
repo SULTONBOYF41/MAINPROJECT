@@ -39,3 +39,68 @@ export function submitOrder(event) {
       button.disabled = false;
     });
 }
+
+// --- Tablar logikasi ---
+document.getElementById("tab-add-order").onclick = function () {
+  this.classList.add("active");
+  document.getElementById("tab-orders-list").classList.remove("active");
+  document.getElementById("order-form-section").style.display = "";
+  document.getElementById("orders-list-section").style.display = "none";
+};
+
+document.getElementById("tab-orders-list").onclick = function () {
+  this.classList.add("active");
+  document.getElementById("tab-add-order").classList.remove("active");
+  document.getElementById("order-form-section").style.display = "none";
+  document.getElementById("orders-list-section").style.display = "";
+  loadOrders();
+};
+
+// --- Buyurtma qo'shish funksiyasi (sizning eski kodingiz) ---
+document.getElementById("order-form")?.addEventListener("submit", submitOrder);
+
+// --- Buyurtmalarni yuklash va jadvalga chiqarish ---
+function loadOrders() {
+  fetch("http://localhost:3000/orders")
+    .then(res => res.json())
+    .then(orders => {
+      const tbody = document.querySelector("#orders-table tbody");
+      tbody.innerHTML = "";
+      orders.forEach((order, idx) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${idx + 1}</td>
+          <td>${order.customer}</td>
+          <td>${order.product}</td>
+          <td>${order.quantity}</td>
+          <td>${order.unit}</td>
+          <td>${order.source}</td>
+          <td>${order.price}</td>
+          <td>${order.date}</td>
+          <td>${order.note || ""}</td>
+          <td>${order.status || "pending"}</td>
+          <td>
+            <button class="status-btn" onclick="updateStatus(${order.id}, 'qabul qilindi')">Qabul qilish</button>
+            <button class="status-btn" onclick="updateStatus(${order.id}, 'bekor qilindi')">Bekor qilish</button>
+            <button class="status-btn" onclick="updateStatus(${order.id}, 'tayyor')">Tayyor</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    });
+}
+
+// --- Buyurtma statusini o'zgartirish ---
+window.updateStatus = function(orderId, status) {
+  fetch(`http://localhost:3000/orders/${orderId}/status`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status })
+  })
+    .then(res => res.text())
+    .then(msg => {
+      alert(msg);
+      loadOrders();
+    })
+    .catch(() => alert("Statusni o‘zgartirishda xatolik!"));
+}

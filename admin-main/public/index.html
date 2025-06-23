@@ -71,19 +71,53 @@
 
     <!-- 🛒 BUYURTMALAR -->
     <section id="page-orders" class="page">
-      <h2>➕ Yangi buyurtma qo‘shish</h2>
-      <form id="order-form">
-        <input name="customer" placeholder="Mijoz ismi" required />
-        <input name="product" placeholder="Mahsulot nomi" required />
-        <input name="quantity" type="number" placeholder="Miqdori" step="any" required />
-        <input name="unit" placeholder="Birlik (dona/kg)" required />
-        <input name="source" placeholder="Manba (Instagram/Telegram...)" required />
-        <input name="price" type="number" placeholder="Narxi so‘mda" required />
-        <input name="date" type="date" required />
-        <input name="note" placeholder="Izoh (ixtiyoriy)" />
-        <button type="submit">✅ Qo‘shish</button>
-      </form>
+      <div class="order-tabs">
+        <button id="tab-add-order" class="tab-btn active">Buyurtma kiritish</button>
+        <button id="tab-orders-list" class="tab-btn">Buyurtmalar</button>
+      </div>
+
+      <!-- Buyurtma qo‘shish formasi -->
+      <div id="order-form-section">
+        <h2>➕ Yangi buyurtma qo‘shish</h2>
+        <form id="order-form">
+          <input name="customer" placeholder="Mijoz ismi" required />
+          <input name="product" placeholder="Mahsulot nomi" required />
+          <input name="quantity" type="number" placeholder="Miqdori" step="any" required />
+          <input name="unit" placeholder="Birlik (dona/kg)" required />
+          <input name="source" placeholder="Manba (Instagram/Telegram...)" required />
+          <input name="price" type="number" placeholder="Narxi so‘mda" required />
+          <input name="date" type="date" required />
+          <input name="note" placeholder="Izoh (ixtiyoriy)" />
+          <button type="submit">✅ Qo‘shish</button>
+        </form>
+      </div>
+
+      <!-- Buyurtmalar ro‘yxati -->
+      <div id="orders-list-section" style="display: none;">
+        <h2>🗂 Buyurtmalar ro‘yxati</h2>
+        <table id="orders-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Mijoz</th>
+              <th>Mahsulot</th>
+              <th>Miqdor</th>
+              <th>Birlik</th>
+              <th>Manba</th>
+              <th>Narxi</th>
+              <th>Sana</th>
+              <th>Izoh</th>
+              <th>Status</th>
+              <th>Amal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- buyurtmalar shu yerda paydo bo‘ladi -->
+          </tbody>
+        </table>
+      </div>
     </section>
+
 
     <!-- 💸 XARAJATLAR -->
     <section id="page-expenses" class="page">

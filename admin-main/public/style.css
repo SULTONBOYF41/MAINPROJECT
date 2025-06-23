@@ -450,3 +450,42 @@ footer {
 /* #main-price, #main-unit {
   transition: all 0.2s;
 } */
+
+
+.order-tabs{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tab-btn{
+  background-color: #770E13;
+  color: #fff;
+  border: 1px solid #770E13;
+  border-radius: 8px;
+  padding: 12px 200px;
+  cursor: pointer;
+  margin-bottom: 30px;
+}
+
+.tab-btn:hover{
+  background-color: #fff;
+  color: #770E13;
+  transition: 0.3s ease-in-out;
+}
+
+
+.status-btn{
+  padding: 4px 8px;
+  background-color: transparent;
+  border: 2px solid #770E13;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.status-btn:hover{
+  background-color: #770E13;
+  color: #fff;
+  transition: 0.3s ease-in-out;
+}

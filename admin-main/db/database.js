@@ -1,6 +1,10 @@
 // 📁 db/database.js
 const sqlite3 = require("sqlite3").verbose();
-const db = new sqlite3.Database("./ruxshona.db");
+const path = require("path");
+
+// Bazani nomini yagona qilamiz:
+const dbPath = path.resolve(__dirname, "ruxshona.db");
+const db = new sqlite3.Database(dbPath);
 
 // Mahsulotlar jadvali (has_variants alohida berilgan)
 db.run(`
@@ -48,7 +52,7 @@ db.run(`
     name TEXT NOT NULL,
     quantity REAL NOT NULL,
     unit TEXT NOT NULL,
-    size REAL,                -- <== YANGI QO'SHILGAN
+    size REAL,
     date TEXT NOT NULL
   )
 `);
@@ -63,22 +67,32 @@ db.run(`
     unit TEXT NOT NULL,
     price INTEGER NOT NULL,
     date TEXT NOT NULL,
-    source TEXT
+    source TEXT,
+    size REAL
   )
 `);
 
-// Buyurtmalar
+// Buyurtmalar (universal, hamma maydonlar bilan)
 db.run(`
   CREATE TABLE IF NOT EXISTS orders (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    product TEXT NOT NULL,
-    quantity REAL NOT NULL,
-    unit TEXT NOT NULL,
-    price INTEGER NOT NULL,
-    date TEXT NOT NULL,
+    product TEXT,         -- admin panel buyurtmalari uchun
+    quantity REAL,
+    unit TEXT,
+    price INTEGER,
+    date TEXT,
     source TEXT,
     customer TEXT,
-    note TEXT
+    note TEXT,
+    status TEXT DEFAULT 'pending',
+
+    -- Quyidagilar telegram botdan kelsa to‘ladi, admin paneldan kelganda null
+    cake_name TEXT,       -- tort nomi (telegram-bot)
+    weight TEXT,          -- og‘irligi (telegram-bot)
+    phone TEXT,           -- telefon raqam (telegram-bot)
+    username TEXT,        -- telegram username
+    chat_id INTEGER,
+    created_at TEXT
   )
 `);
 
@@ -102,38 +116,29 @@ db.run(`
   )
 `);
 
-// --- Migratsiya: eski bazalarda yetishmayotgan ustunlarni qo‘shish ---
-db.all("PRAGMA table_info(products)", (err, columns) => {
-  if (err) {
-    console.error("PRAGMA table_info(products) xatolik:", err.message);
-    return;
-  }
-  if (!columns.some(c => c.name === 'has_variants')) {
-    db.run(`ALTER TABLE products ADD COLUMN has_variants INTEGER DEFAULT 0`);
-  }
-});
+// --- Migratsiya: yetishmayotgan ustunlarni qo‘shish (versiyadan qat'i nazar) ---
+const migrateIfMissing = (table, column, def) => {
+  db.all(`PRAGMA table_info(${table})`, (err, columns) => {
+    if (err) {
+      console.error(`PRAGMA table_info(${table}) xatolik:`, err.message);
+      return;
+    }
+    // Column nomini kichik harfga tekshirib, aniq solishtiring:
+    if (!columns.some(c => c.name && c.name.toLowerCase() === column.toLowerCase())) {
+      db.run(`ALTER TABLE ${table} ADD COLUMN ${column} ${def}`);
+    }
+  });
+};
 
-db.all("PRAGMA table_info(production)", (err, columns) => {
-  if (err) {
-    console.error("PRAGMA table_info(production) xatolik:", err.message);
-    return;
-  }
-  if (!columns.some(c => c.name === 'size')) {
-    db.run(`ALTER TABLE production ADD COLUMN size REAL`);
-  }
-});
-
-// --- Migratsiya: branch_sales jadvaliga size ustuni qo‘shish
-db.all("PRAGMA table_info(branch_sales)", (err, columns) => {
-  if (err) {
-    console.error("PRAGMA table_info(branch_sales) xatolik:", err.message);
-    return;
-  }
-  if (!columns.some(c => c.name === 'size')) {
-    db.run(`ALTER TABLE branch_sales ADD COLUMN size REAL`);
-  }
-});
-
+migrateIfMissing("products", "has_variants", "INTEGER DEFAULT 0");
+migrateIfMissing("production", "size", "REAL");
+migrateIfMissing("branch_sales", "size", "REAL");
+migrateIfMissing("orders", "cake_name", "TEXT");
+migrateIfMissing("orders", "weight", "TEXT");
+migrateIfMissing("orders", "phone", "TEXT");
+migrateIfMissing("orders", "username", "TEXT");
+migrateIfMissing("orders", "chat_id", "INTEGER");
+migrateIfMissing("orders", "created_at", "TEXT");
 
 
 module.exports = db;

@@ -21,14 +21,14 @@ router.get("/", (_, res) => {
   });
 });
 
-module.exports = router;
-
-
-router.get("/orders", (_, res) => {
-  db.all("SELECT * FROM orders ORDER BY date DESC", [], (err, rows) => {
-    if (err) return res.status(500).send(err.message);
-    res.json(rows);
+router.put("/:id/status", (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  db.run("UPDATE orders SET status = ? WHERE id = ?", [status, id], function(err) {
+    if (err) return res.status(500).send("Xatolik: " + err.message);
+    res.send("Status muvaffaqiyatli o‘zgartirildi");
   });
 });
+
 
 module.exports = router;
