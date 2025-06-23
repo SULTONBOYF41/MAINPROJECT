@@ -31,15 +31,20 @@
         <label><input type="radio" name="reportType" value="kunlik" checked /> Kunlik</label>
         <label><input type="radio" name="reportType" value="haftalik" /> Haftalik</label>
         <label><input type="radio" name="reportType" value="oylik" /> Oylik</label>
+        <label><input type="radio" name="reportType" value="oraliq" /> Oraliq</label>
       </div>
 
       <div class="report-date-input">
-        <input type="date" id="report-date" />
+        <input type="date" id="report-date" style="display: inline" />
         <input type="week" id="report-week" style="display: none" />
         <input type="month" id="report-month" style="display: none" />
+        <input type="date" id="report-date-from" style="display: none" placeholder="Boshlanish sanasi" />
+        <input type="date" id="report-date-to" style="display: none" placeholder="Tugash sanasi" />
         <button id="view-report-btn">📊 Hisobotni ko‘rish</button>
         <button id="download-pdf-btn">📄 PDF yuklab olish</button>
       </div>
+
+
 
       <div class="report-summary" id="report-summary" style="display: none">
         <div class="card report-card"><span class="label">🧁 Ishlab chiqarilgan:</span> <span id="produced-count">-</span></div>

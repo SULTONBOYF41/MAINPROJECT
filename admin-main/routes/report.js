@@ -2,16 +2,18 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db/database");
 const { getDateRange } = require("../utils/dateHelpers");
+const PDFDocument = require("pdfkit"); // Boshida
+const stream = require("stream");      // Boshida, agar kerak bo‘lsa
 
-// 🔵 ASOSIY hisobot
-router.get("/:type", (req, res) => {
-  const { type } = req.params;
-  const { date, week, month, branch } = req.query;
+// YANGI: Sana oraliq bo‘yicha hisobot
+router.get("/interval", (req, res) => {
+  const { from, to, branch } = req.query;
+  if (!from || !to) return res.status(400).send("❌ Sana oralig‘i tanlanmagan");
 
-  const queryParam = date || week || month;
-  if (!queryParam) return res.status(400).send("❌ Sana tanlanmagan");
+  // Quyida eski asosiy hisobot logikasini takrorlang, faqat start = from, end = to bo‘ladi:
+  const start = from, end = to;
 
-  const { start, end } = getDateRange(type, queryParam);
+  // --- Quyida qolgan eski kodni copy-paste qilamiz (faqat type/queryParam qismi yo'q) ---
 
   const report = {
     range: { start, end },
@@ -90,7 +92,6 @@ router.get("/:type", (req, res) => {
             FROM branch_sales
             WHERE date BETWEEN ? AND ?`;
 
-
         const params = branch ? [start, end, branch] : [start, end];
 
         db.get(branchQuery, params, (err, branchData) => {
@@ -116,6 +117,71 @@ router.get("/:type", (req, res) => {
       });
     });
   });
+});
+
+// === PDF Hisobot route ===
+router.get("/pdf/:type", (req, res) => {
+  const { type } = req.params;
+  const { date, week, month, from, to } = req.query;
+  // Sana oraliqni aniqlash
+  let queryParam = date || week || month || null;
+  let start, end;
+  if (type === "oraliq") {
+    if (!from || !to) return res.status(400).send("❌ Sana oralig‘i tanlanmagan");
+    start = from;
+    end = to;
+  } else {
+    if (!queryParam) return res.status(400).send("❌ Sana tanlanmagan");
+    const range = require("../utils/dateHelpers").getDateRange(type, queryParam);
+    start = range.start;
+    end = range.end;
+  }
+
+  // Ma'lumotlarni SQLdan yuklash (foydalanuvchi ehtiyojiga moslashtiring)
+  db.all(
+    `SELECT * FROM orders WHERE date BETWEEN ? AND ? ORDER BY date ASC`,
+    [start, end],
+    (err, rows) => {
+      if (err) return res.status(500).send("❌ PDF uchun buyurtmalarni olishda xatolik: " + err.message);
+
+      // PDF document yaratish
+      const doc = new PDFDocument({ size: 'A4', margin: 36 });
+      res.setHeader('Content-Disposition', 'attachment; filename="report.pdf"');
+      res.setHeader('Content-Type', 'application/pdf');
+      doc.pipe(res);
+
+      doc.fontSize(16).text('📊 Ruxshona Tort Hisobot', { align: 'center' });
+      doc.moveDown();
+      doc.fontSize(12).text(`Sana oralig‘i: ${start} dan ${end} gacha`);
+      doc.moveDown();
+
+      // Jadval sarlavhasi
+      doc.font("Helvetica-Bold");
+      doc.text("Mijoz", 40, doc.y, { continued: true });
+      doc.text("Mahsulot", 120, doc.y, { continued: true });
+      doc.text("Miqdor", 250, doc.y, { continued: true });
+      doc.text("Birlik", 310, doc.y, { continued: true });
+      doc.text("Narxi", 370, doc.y, { continued: true });
+      doc.text("Sana", 440, doc.y, { continued: true });
+      doc.text("Izoh", 500, doc.y);
+      doc.font("Helvetica");
+
+      doc.moveDown(0.5);
+
+      // Jadval qatorlari
+      rows.forEach(row => {
+        doc.text(row.customer || "-", 40, doc.y, { continued: true });
+        doc.text(row.product || "-", 120, doc.y, { continued: true });
+        doc.text(row.quantity || "-", 250, doc.y, { continued: true });
+        doc.text(row.unit || "-", 310, doc.y, { continued: true });
+        doc.text(row.price || "-", 370, doc.y, { continued: true });
+        doc.text(row.date || "-", 440, doc.y, { continued: true });
+        doc.text(row.note || "-", 500, doc.y);
+      });
+
+      doc.end();
+    }
+  );
 });
 
 module.exports = router;
