@@ -258,27 +258,27 @@ document.addEventListener("DOMContentLoaded", () => {
         if (item.size !== null && item.size !== undefined) {
           // size son ko‘rinishida bo‘lsa, "40 sm (dona)" yoki "0.5 kg" format qilamiz
           let unitLabel = item.unit || "";
-          // Agar birlik "kg" bo‘lsa, float ko‘rinishda qoldiramiz, aks holda butun son
           let sizeLabel = (unitLabel === "kg") ? item.size : parseInt(item.size);
           productLabel = `${item.product} ${sizeLabel} ${unitLabel}`;
         }
 
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${item.date}</td>
-        <td>${productLabel}</td>
-        <td>${item.quantity}</td>
-        <td>${item.unit}</td>
-        <td>${item.price} so'm</td>
-        <td><button class="edit-sale-btn" data-id="${item.id}" data-json='${JSON.stringify(item)}'>✏️</button></td>
-      `;
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${item.date}</td>
+          <td>${productLabel}</td>
+          <td>${item.quantity}</td>
+          <td>${item.unit}</td>
+          <td>${item.price} so'm</td>
+          <td><button class="edit-sale-btn" data-id="${item.id}" data-json='${JSON.stringify(item)}'>✏️</button></td>
+        `;
 
-      tableBody.appendChild(row);
-    });
-  } catch (err) {
-    console.error("❌ Sotuvlar tarixini yuklashda xatolik:", err.message);
+        tableBody.appendChild(row);
+      });
+    } catch (err) {
+      console.error("❌ Sotuvlar tarixini yuklashda xatolik:", err.message);
+    }
   }
-}
+
 
 
   // 🔁 Sahifalar orasida almashish
