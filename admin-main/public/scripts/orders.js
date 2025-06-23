@@ -1,3 +1,4 @@
+// --- FORM BUYURTMA QO'SHISH ---
 export function submitOrder(event) {
   event.preventDefault();
   const form = event.target;
@@ -21,7 +22,7 @@ export function submitOrder(event) {
     return;
   }
 
-  fetch("http://localhost:3000/orders", {
+  fetch("/orders", { // localhost:3000 ni yozmaslik yaxshi (prod uchun)
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -33,6 +34,8 @@ export function submitOrder(event) {
       alert(msg);
       form.reset();
       button.disabled = false;
+      // Yangi buyurtma kiritilganda ro'yxatni avtomatik yangilash
+      loadOrders();
     })
     .catch(() => {
       alert("Buyurtma qo‘shishda xatolik yuz berdi");
@@ -40,7 +43,7 @@ export function submitOrder(event) {
     });
 }
 
-// --- Tablar logikasi ---
+// --- TABLAR LOGIKASI ---
 document.getElementById("tab-add-order").onclick = function () {
   this.classList.add("active");
   document.getElementById("tab-orders-list").classList.remove("active");
@@ -56,15 +59,13 @@ document.getElementById("tab-orders-list").onclick = function () {
   loadOrders();
 };
 
-// --- Buyurtma qo'shish funksiyasi (sizning eski kodingiz) ---
-document.getElementById("order-form")?.addEventListener("submit", submitOrder);
-
-// --- Buyurtmalarni yuklash va jadvalga chiqarish ---
-function loadOrders() {
-  fetch("http://localhost:3000/orders")
+// --- BUYURTMALAR JADVALLARINI YUKLASH ---
+export function loadOrders() {
+  fetch("/orders")
     .then(res => res.json())
     .then(orders => {
       const tbody = document.querySelector("#orders-table tbody");
+      if (!tbody) return;
       tbody.innerHTML = "";
       orders.forEach((order, idx) => {
         const tr = document.createElement("tr");
@@ -90,9 +91,9 @@ function loadOrders() {
     });
 }
 
-// --- Buyurtma statusini o'zgartirish ---
+// --- STATUS O'ZGARTIRISH ---
 window.updateStatus = function(orderId, status) {
-  fetch(`http://localhost:3000/orders/${orderId}/status`, {
+  fetch(`/orders/${orderId}/status`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status })
