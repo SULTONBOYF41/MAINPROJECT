@@ -6,6 +6,19 @@ const path = require("path");
 const dbPath = path.resolve(__dirname, "ruxshona.db");
 const db = new sqlite3.Database(dbPath);
 
+
+db.run(`
+  CREATE TABLE IF NOT EXISTS customers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    fullname TEXT,
+    phone TEXT,
+    address TEXT,
+    birthday TEXT,
+    telegram_id INTEGER UNIQUE,
+    username TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+  )
+`);
 // Mahsulotlar jadvali (has_variants alohida berilgan)
 db.run(`
   CREATE TABLE IF NOT EXISTS products (
@@ -139,6 +152,10 @@ migrateIfMissing("orders", "phone", "TEXT");
 migrateIfMissing("orders", "username", "TEXT");
 migrateIfMissing("orders", "chat_id", "INTEGER");
 migrateIfMissing("orders", "created_at", "TEXT");
+
+migrateIfMissing("customers", "address", "TEXT");
+migrateIfMissing("customers", "birthday", "TEXT");
+
 
 
 module.exports = db;

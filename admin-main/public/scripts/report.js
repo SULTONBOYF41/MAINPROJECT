@@ -9,6 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const monthInput = document.getElementById("report-month");
   const dateFrom = document.getElementById("report-date-from");
   const dateTo = document.getElementById("report-date-to");
+  document.getElementById("view-report-btn").onclick = viewReport;
+  document.getElementById("download-pdf-btn").onclick = downloadPdfReport;
 
   function handleTypeChange() {
     const val = document.querySelector('input[name="reportType"]:checked').value;
@@ -78,6 +80,65 @@ function updateDateInput() {
   else if (type === "oylik" && monthInput) monthInput.style.display = "inline-block";
 }
 
+// --- Yangi render funksiyasi: ---
+function renderReportResult(data) {
+  // Bloklarni olib kelamiz
+  const summary = document.getElementById("report-summary");
+  const row = document.getElementById("report-row");
+  const chartTitle = document.getElementById("chart-title");
+  const reportChart = document.getElementById("reportChart");
+
+  // Ko‘rsatamiz
+  summary.style.display = "block";
+  row.style.display = "flex";
+  chartTitle.style.display = "block";
+  reportChart.style.display = "block";
+
+  // Obyekt elementlarga natijani yozamiz
+  document.getElementById("produced-count").textContent =
+    (data.total_production_kg || 0) + " kg, " + (data.total_production_dona || 0) + " dona";
+  document.getElementById("sold-store").textContent =
+    (data.store_sold_kg || 0) + " kg, " + (data.store_sold_dona || 0) + " dona";
+  document.getElementById("order-count").textContent = data.total_orders || 0;
+  document.getElementById("total-income").textContent = (data.total_income || 0).toLocaleString();
+  document.getElementById("total-expenses").textContent = (data.total_expenses || 0).toLocaleString();
+  document.getElementById("net-profit").textContent = (data.net_profit || 0).toLocaleString();
+
+  // Top 10 mahsulotlar
+  const topProducts = data.top_products || [];
+  const topProductsTable = document.getElementById("top-products");
+  topProductsTable.innerHTML = topProducts.length
+    ? topProducts
+        .map(
+          (p) =>
+            `<tr><td>${p.name}</td><td>${p.sold}</td></tr>`
+        )
+        .join("")
+    : `<tr><td colspan="2">Ma’lumot yo‘q</td></tr>`;
+
+  // Buyurtma manbalari
+  const orderSources = data.platforms || {};
+  const sourcesList = document.getElementById("order-sources");
+  sourcesList.innerHTML =
+    Object.keys(orderSources).length > 0
+      ? Object.entries(orderSources)
+          .map(([source, count]) => `<li>${source}: ${count}</li>`)
+          .join("")
+      : `<li>Ma’lumot yo‘q</li>`;
+
+  // Diagramma (grafik) chizish
+  renderChart(
+    ["Filial daromadi", "Buyurtmalar daromadi", "Xarajatlar", "Sof foyda"],
+    [
+      data.branch_income || 0,
+      data.total_order_income || 0,
+      data.total_expenses || 0,
+      data.net_profit || 0
+    ]
+  );
+}
+
+
 export function viewReport() {
   const type = document.querySelector('input[name="reportType"]:checked').value;
 
@@ -115,14 +176,18 @@ export function viewReport() {
       return res.json();
     })
     .then(data => {
-      // ... Qolgan datani render qilish logikangiz (avvalgidek qoladi)
-      // ...
+      if (!data) return alert("Ma’lumot topilmadi!");
+      renderReportResult(data);
     })
     .catch(err => {
       console.error("❌ Hisobotda xatolik:", err.message);
       alert("Hisobotni olishda xatolik yuz berdi");
     });
 }
+
+
+
+
 
 
 

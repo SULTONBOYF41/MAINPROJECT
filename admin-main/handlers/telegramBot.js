@@ -1,5 +1,8 @@
-const db = require("./db/database"); // Yo'lini loyihangizga qarab moslang
-const { sendOrderToBackend } = require("./utils/api");
+// handlers/telegramBot.js
+const TelegramBot = require("node-telegram-bot-api");
+const { TOKEN } = require("../config");
+const db = require("../db/database");
+const { sendOrderToBackend } = require("../utils/api");
 
 const userStates = {};
 
@@ -9,7 +12,6 @@ function orderHandler(bot) {
     const chatId = msg.chat.id;
     db.get("SELECT * FROM customers WHERE telegram_id = ?", [chatId], (err, customer) => {
       if (customer) {
-        // Chiroyli, zamonaviy matn (HTML formatda)
         bot.sendMessage(chatId, `
 🍰 <b>Assalomu alaykum, ${customer.fullname || customer.username}!</b>
 
@@ -121,5 +123,10 @@ Agar savolingiz bo‘lsa, bemalol yozing!
   });
 }
 
-module.exports = { orderHandler };
+function startTelegramBot() {
+  const bot = new TelegramBot(TOKEN, { polling: true });
+  orderHandler(bot);
+  console.log("🤖 Telegram bot ishlayapti...");
+}
 
+module.exports = { startTelegramBot };

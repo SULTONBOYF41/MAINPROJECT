@@ -2,19 +2,42 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db/database");
 const { getDateRange } = require("../utils/dateHelpers");
-const PDFDocument = require("pdfkit"); // Boshida
-const stream = require("stream");      // Boshida, agar kerak bo‘lsa
+const PDFDocument = require("pdfkit");
+const stream = require("stream");
 
-// YANGI: Sana oraliq bo‘yicha hisobot
-router.get("/interval", (req, res) => {
-  const { from, to, branch } = req.query;
-  if (!from || !to) return res.status(400).send("❌ Sana oralig‘i tanlanmagan");
+// --- Dinamik (kunlik/haftalik/oylik/oraliq) marshrut ---
+router.get("/:type", (req, res) => {
+  const { type } = req.params;
+  let { date, week, month, from, to, branch } = req.query;
 
-  // Quyida eski asosiy hisobot logikasini takrorlang, faqat start = from, end = to bo‘ladi:
-  const start = from, end = to;
+  // Sanani aniqlash
+  let start, end;
 
-  // --- Quyida qolgan eski kodni copy-paste qilamiz (faqat type/queryParam qismi yo'q) ---
+  if (type === "interval" || type === "oraliq") {
+    // Sana oraliq hisobot
+    if (!from || !to) return res.status(400).send("❌ Sana oralig‘i tanlanmagan");
+    start = from;
+    end = to;
+  } else if (type === "kunlik") {
+    if (!date) return res.status(400).send("❌ Sana tanlanmagan");
+    const range = getDateRange("kunlik", date);
+    start = range.start;
+    end = range.end;
+  } else if (type === "haftalik") {
+    if (!week) return res.status(400).send("❌ Hafta tanlanmagan");
+    const range = getDateRange("haftalik", week);
+    start = range.start;
+    end = range.end;
+  } else if (type === "oylik") {
+    if (!month) return res.status(400).send("❌ Oy tanlanmagan");
+    const range = getDateRange("oylik", month);
+    start = range.start;
+    end = range.end;
+  } else {
+    return res.status(400).send("❌ Noto‘g‘ri hisobot turi!");
+  }
 
+  // Hisobot obyektini tayyorlash
   const report = {
     range: { start, end },
     total_production_kg: 0,
@@ -119,32 +142,29 @@ router.get("/interval", (req, res) => {
   });
 });
 
-// === PDF Hisobot route ===
+// --- PDF Hisobot route ---
 router.get("/pdf/:type", (req, res) => {
   const { type } = req.params;
   const { date, week, month, from, to } = req.query;
-  // Sana oraliqni aniqlash
   let queryParam = date || week || month || null;
   let start, end;
-  if (type === "oraliq") {
+  if (type === "oraliq" || type === "interval") {
     if (!from || !to) return res.status(400).send("❌ Sana oralig‘i tanlanmagan");
     start = from;
     end = to;
   } else {
     if (!queryParam) return res.status(400).send("❌ Sana tanlanmagan");
-    const range = require("../utils/dateHelpers").getDateRange(type, queryParam);
+    const range = getDateRange(type, queryParam);
     start = range.start;
     end = range.end;
   }
 
-  // Ma'lumotlarni SQLdan yuklash (foydalanuvchi ehtiyojiga moslashtiring)
   db.all(
     `SELECT * FROM orders WHERE date BETWEEN ? AND ? ORDER BY date ASC`,
     [start, end],
     (err, rows) => {
       if (err) return res.status(500).send("❌ PDF uchun buyurtmalarni olishda xatolik: " + err.message);
 
-      // PDF document yaratish
       const doc = new PDFDocument({ size: 'A4', margin: 36 });
       res.setHeader('Content-Disposition', 'attachment; filename="report.pdf"');
       res.setHeader('Content-Type', 'application/pdf');
@@ -165,7 +185,6 @@ router.get("/pdf/:type", (req, res) => {
       doc.text("Sana", 440, doc.y, { continued: true });
       doc.text("Izoh", 500, doc.y);
       doc.font("Helvetica");
-
       doc.moveDown(0.5);
 
       // Jadval qatorlari
